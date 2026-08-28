@@ -1,0 +1,1035 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Air Canada - Galley Finder</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, Helvetica, sans-serif;
+            background-color: #f5f5f5;
+            color: #222222;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            margin-top: 0;
+            margin-bottom: 20px;
+            color: #d71920;
+        }
+
+        h2 {
+            margin-top: 0;
+            color: #333333;
+        }
+
+        .card {
+            margin-bottom: 20px;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        label {
+            display: block;
+            margin-top: 15px;
+            margin-bottom: 6px;
+            font-weight: bold;
+        }
+
+        label:first-child {
+            margin-top: 0;
+        }
+
+        select,
+        input {
+            width: 100%;
+            max-width: 500px;
+            min-height: 44px;
+            padding: 10px;
+            font-size: 16px;
+            background-color: #ffffff;
+            border: 1px solid #cccccc;
+            border-radius: 5px;
+        }
+
+        select:focus,
+        input:focus {
+            border-color: #d71920;
+            outline: 2px solid rgba(215, 25, 32, 0.15);
+        }
+
+        .search-container {
+            display: flex;
+            align-items: stretch;
+            gap: 10px;
+            width: 100%;
+            max-width: 650px;
+        }
+
+        .search-container input {
+            flex: 1;
+            max-width: none;
+        }
+
+        button {
+            min-height: 44px;
+            padding: 10px 22px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            color: #ffffff;
+            background-color: #d71920;
+            border: none;
+            border-radius: 5px;
+        }
+
+        button:hover {
+            background-color: #b7151b;
+        }
+
+        button:focus {
+            outline: 3px solid rgba(215, 25, 32, 0.25);
+        }
+
+        button:disabled {
+            cursor: not-allowed;
+            background-color: #999999;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .visible {
+            display: block;
+        }
+
+        #results-container {
+            margin-top: 20px;
+        }
+
+        #results {
+            margin-bottom: 20px;
+        }
+
+        .results-summary {
+            margin-bottom: 12px;
+            font-weight: bold;
+            color: #333333;
+        }
+
+        .result {
+            margin-bottom: 12px;
+            padding: 15px;
+            background-color: #ffffff;
+            border-left: 5px solid #d71920;
+            border-radius: 5px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+        }
+
+        .result-description {
+            display: block;
+            margin-bottom: 12px;
+            font-size: 18px;
+            color: #d71920;
+        }
+
+        .result-line {
+            margin-top: 6px;
+        }
+
+        .no-result {
+            padding: 15px;
+            color: #333333;
+            background-color: #fff4f4;
+            border-left: 5px solid #d71920;
+            border-radius: 5px;
+        }
+
+        .error-message {
+            padding: 15px;
+            color: #721c24;
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            border-radius: 5px;
+        }
+
+        #aircraft-layout {
+            padding: 20px;
+            overflow: hidden;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        #lopa {
+            display: block;
+            width: 100%;
+            min-height: 450px;
+            border: none;
+        }
+
+        @media only screen and (max-width: 650px) {
+            body {
+                padding: 12px;
+            }
+
+            .card,
+            #aircraft-layout {
+                padding: 15px;
+            }
+
+            .search-container {
+                display: block;
+            }
+
+            .search-container input {
+                width: 100%;
+            }
+
+            .search-container button {
+                width: 100%;
+                margin-top: 10px;
+            }
+
+            #lopa {
+                min-height: 320px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+
+        <h1>Galley Finder</h1>
+
+        <div class="card">
+
+            <label for="fin-select">FIN</label>
+
+            <select id="fin-select">
+                <option value="">✈️ Select FIN</option>
+            </select>
+
+            <label for="service-select">Service</label>
+
+            <select id="service-select" disabled>
+                <option value="">🍽️ Select Service</option>
+            </select>
+
+            <label for="search-box">Item</label>
+
+            <div class="search-container">
+
+                <input
+                    type="text"
+                    id="search-box"
+                    list="item-suggestions"
+                    placeholder="Ex: TEA BAG"
+                    autocomplete="off"
+                    disabled
+                >
+
+                <datalist id="item-suggestions"></datalist>
+
+                <button
+                    type="button"
+                    id="btn-search"
+                    disabled
+                >
+                    Rechercher
+                </button>
+
+            </div>
+
+        </div>
+
+        <div id="results-container" class="hidden">
+
+            <div id="results"></div>
+
+            <div id="aircraft-layout">
+
+                <h2>Aircraft Layout</h2>
+
+                <object
+                    id="lopa"
+                    data="1955.svg"
+                    type="image/svg+xml"
+                    width="100%"
+                >
+                    Votre navigateur ne peut pas afficher le plan de l’avion.
+                </object>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <script>
+        "use strict";
+
+        let galleyData = [];
+        let lopaDoc = null;
+        let pendingGalleys = [];
+
+        const finSelect =
+            document.getElementById("fin-select");
+
+        const serviceSelect =
+            document.getElementById("service-select");
+
+        const searchBox =
+            document.getElementById("search-box");
+
+        const searchButton =
+            document.getElementById("btn-search");
+
+        const itemSuggestions =
+            document.getElementById("item-suggestions");
+
+        const resultsContainer =
+            document.getElementById("results-container");
+
+        const resultsElement =
+            document.getElementById("results");
+
+        const lopaObject =
+            document.getElementById("lopa");
+
+
+        /*
+         * Chargement du fichier JSON.
+         *
+         * Le fichier doit s’appeler exactement :
+         * 1955-galleydata.json
+         *
+         * Il doit être placé dans le même dossier que index.html.
+         */
+        fetch("1955-galleydata.json")
+            .then(function(response) {
+
+                if (!response.ok) {
+                    throw new Error(
+                        "Erreur HTTP " +
+                        response.status +
+                        " lors du chargement du JSON."
+                    );
+                }
+
+                return response.json();
+            })
+            .then(function(data) {
+
+                if (!Array.isArray(data)) {
+                    throw new Error(
+                        "Le contenu du fichier JSON n’est pas une liste."
+                    );
+                }
+
+                galleyData = data;
+
+                populateFINs();
+
+                console.log(
+                    "Galley data loaded:",
+                    galleyData.length,
+                    "records"
+                );
+            })
+            .catch(function(error) {
+
+                console.error(
+                    "Unable to load 1955-galleydata.json:",
+                    error
+                );
+
+                resultsContainer.classList.remove("hidden");
+
+                resultsElement.innerHTML = `
+                    <div class="error-message">
+                        <strong>Le fichier de données ne peut pas être chargé.</strong>
+                        <br><br>
+                        Vérifiez que le fichier
+                        <strong>1955-galleydata.json</strong>
+                        se trouve dans le même dossier que
+                        <strong>index.html</strong>.
+                        <br><br>
+                        Détail technique :
+                        ${escapeHTML(error.message)}
+                    </div>
+                `;
+            });
+
+
+        /*
+         * Chargement du SVG.
+         */
+        lopaObject.addEventListener("load", function() {
+
+            try {
+                lopaDoc = lopaObject.contentDocument;
+
+                if (!lopaDoc) {
+                    throw new Error(
+                        "Le contenu du SVG n’est pas accessible."
+                    );
+                }
+
+                console.log("LOPA loaded successfully");
+
+                clearHighlights();
+
+                if (pendingGalleys.length > 0) {
+                    highlightGalleys(pendingGalleys);
+                }
+            }
+            catch (error) {
+                console.error(
+                    "Unable to access the SVG:",
+                    error
+                );
+            }
+        });
+
+
+        /*
+         * Création de la liste des FIN.
+         */
+        function populateFINs() {
+
+            const fins = [
+                ...new Set(
+                    galleyData
+                        .map(function(item) {
+                            return item.FINs;
+                        })
+                        .filter(function(fin) {
+                            return fin !== null &&
+                                   fin !== undefined &&
+                                   String(fin).trim() !== "";
+                        })
+                )
+            ].sort(function(a, b) {
+                return String(a).localeCompare(
+                    String(b),
+                    undefined,
+                    {
+                        numeric: true,
+                        sensitivity: "base"
+                    }
+                );
+            });
+
+            fins.forEach(function(fin) {
+
+                const option =
+                    document.createElement("option");
+
+                option.value = String(fin);
+                option.textContent = String(fin);
+
+                finSelect.appendChild(option);
+            });
+        }
+
+
+        /*
+         * Lorsqu’un FIN est sélectionné :
+         *
+         * 1. La liste des services est créée.
+         * 2. L’ancien service est effacé.
+         * 3. La recherche est réinitialisée.
+         */
+        finSelect.addEventListener("change", function() {
+
+            const selectedFIN = finSelect.value;
+
+            resetServiceSelection();
+            resetSearch();
+
+            if (selectedFIN === "") {
+                serviceSelect.disabled = true;
+                return;
+            }
+
+            const services = [
+                ...new Set(
+                    galleyData
+                        .filter(function(item) {
+                            return String(item.FINs) === selectedFIN;
+                        })
+                        .map(function(item) {
+                            return item.Service;
+                        })
+                        .filter(function(service) {
+                            return service !== null &&
+                                   service !== undefined &&
+                                   String(service).trim() !== "";
+                        })
+                )
+            ].sort(function(a, b) {
+                return String(a).localeCompare(
+                    String(b),
+                    undefined,
+                    {
+                        numeric: true,
+                        sensitivity: "base"
+                    }
+                );
+            });
+
+            services.forEach(function(service) {
+
+                const option =
+                    document.createElement("option");
+
+                option.value = String(service);
+                option.textContent = String(service);
+
+                serviceSelect.appendChild(option);
+            });
+
+            serviceSelect.disabled = false;
+        });
+
+
+        /*
+         * Lorsqu’un service est sélectionné :
+         *
+         * L’autocomplétion affiche seulement les items disponibles
+         * pour le FIN ET le service sélectionnés.
+         */
+        serviceSelect.addEventListener("change", function() {
+
+            resetSearch();
+
+            const selectedFIN = finSelect.value;
+            const selectedService = serviceSelect.value;
+
+            if (
+                selectedFIN === "" ||
+                selectedService === ""
+            ) {
+                searchBox.disabled = true;
+                searchButton.disabled = true;
+                return;
+            }
+
+            populateItemSuggestions(
+                selectedFIN,
+                selectedService
+            );
+
+            searchBox.disabled = false;
+            searchButton.disabled = false;
+            searchBox.focus();
+        });
+
+
+        /*
+         * Recherche lorsqu’on clique sur le bouton.
+         */
+        searchButton.addEventListener("click", function() {
+            searchItem();
+        });
+
+
+        /*
+         * Recherche lorsqu’on appuie sur Entrée.
+         */
+        searchBox.addEventListener("keydown", function(event) {
+
+            if (event.key === "Enter") {
+                event.preventDefault();
+                searchItem();
+            }
+        });
+
+
+        function resetServiceSelection() {
+
+            serviceSelect.innerHTML = `
+                <option value="">
+                    🍽️ Select Service
+                </option>
+            `;
+
+            serviceSelect.disabled = true;
+        }
+
+
+        function resetSearch() {
+
+            searchBox.value = "";
+            searchBox.disabled = true;
+
+            searchButton.disabled = true;
+
+            itemSuggestions.innerHTML = "";
+
+            pendingGalleys = [];
+
+            resultsElement.innerHTML = "";
+
+            resultsContainer.classList.add("hidden");
+            resultsContainer.classList.remove("visible");
+
+            clearHighlights();
+        }
+
+
+        /*
+         * Création des suggestions d’items.
+         */
+        function populateItemSuggestions(
+            selectedFIN,
+            selectedService
+        ) {
+
+            itemSuggestions.innerHTML = "";
+
+            const descriptions = [
+                ...new Set(
+                    galleyData
+                        .filter(function(item) {
+                            return (
+                                String(item.FINs) === selectedFIN &&
+                                String(item.Service) === selectedService &&
+                                item.Description
+                            );
+                        })
+                        .map(function(item) {
+                            return String(item.Description).trim();
+                        })
+                        .filter(function(description) {
+                            return description !== "";
+                        })
+                )
+            ].sort(function(a, b) {
+                return a.localeCompare(
+                    b,
+                    undefined,
+                    {
+                        numeric: true,
+                        sensitivity: "base"
+                    }
+                );
+            });
+
+            descriptions.forEach(function(description) {
+
+                const option =
+                    document.createElement("option");
+
+                option.value = description;
+
+                itemSuggestions.appendChild(option);
+            });
+        }
+
+
+        /*
+         * Recherche de l’item.
+         */
+        function searchItem() {
+
+            const fin =
+                finSelect.value;
+
+            const service =
+                serviceSelect.value;
+
+            const keyword =
+                searchBox.value.trim();
+
+            if (fin === "") {
+                alert("Sélectionnez un FIN.");
+                finSelect.focus();
+                return;
+            }
+
+            if (service === "") {
+                alert("Sélectionnez un service.");
+                serviceSelect.focus();
+                return;
+            }
+
+            if (keyword === "") {
+                alert("Entrez le nom d’un item.");
+                searchBox.focus();
+                return;
+            }
+
+            const normalizedKeyword =
+                normalizeText(keyword);
+
+            const results =
+                galleyData.filter(function(item) {
+
+                    const sameFIN =
+                        String(item.FINs) === fin;
+
+                    const sameService =
+                        String(item.Service) === service;
+
+                    const description =
+                        item.Description
+                            ? normalizeText(item.Description)
+                            : "";
+
+                    return (
+                        sameFIN &&
+                        sameService &&
+                        description.includes(normalizedKeyword)
+                    );
+                });
+
+            pendingGalleys = [
+                ...new Set(
+                    results
+                        .map(function(item) {
+                            return item.Galley;
+                        })
+                        .filter(function(galley) {
+                            return (
+                                galley !== null &&
+                                galley !== undefined &&
+                                String(galley).trim() !== ""
+                            );
+                        })
+                        .map(function(galley) {
+                            return String(galley).trim();
+                        })
+                )
+            ];
+
+            displayResults(results);
+
+            resultsContainer.classList.remove("hidden");
+            resultsContainer.classList.add("visible");
+
+            clearHighlights();
+            highlightGalleys(pendingGalleys);
+        }
+
+
+        /*
+         * Affichage des résultats.
+         */
+        function displayResults(results) {
+
+            if (results.length === 0) {
+
+                resultsElement.innerHTML = `
+                    <div class="no-result">
+                        Aucun item trouvé pour
+                        <strong>${escapeHTML(searchBox.value.trim())}</strong>.
+                    </div>
+                `;
+
+                return;
+            }
+
+            let html = `
+                <div class="results-summary">
+                    ${results.length}
+                    ${results.length === 1 ? "emplacement trouvé" : "emplacements trouvés"}
+                </div>
+            `;
+
+            results.forEach(function(item) {
+
+                const description =
+                    formatValue(item.Description);
+
+                const galley =
+                    formatValue(item.Galley);
+
+                const container =
+                    formatValue(item.Container);
+
+                const quantity =
+                    formatValue(item.Qty);
+
+                html += `
+                    <div class="result">
+
+                        <strong class="result-description">
+                            ${description}
+                        </strong>
+
+                        <div class="result-line">
+                            🚪 Galley :
+                            <strong>${galley}</strong>
+                        </div>
+
+                        <div class="result-line">
+                            📦 Container :
+                            <strong>${container}</strong>
+                        </div>
+
+                        <div class="result-line">
+                            Quantité :
+                            <strong>${quantity}</strong>
+                        </div>
+
+                    </div>
+                `;
+            });
+
+            resultsElement.innerHTML = html;
+        }
+
+
+        /*
+         * Mise en surbrillance de plusieurs galleys.
+         */
+        function highlightGalleys(galleys) {
+
+            if (!lopaDoc) {
+                console.warn(
+                    "Le SVG n’est pas encore chargé."
+                );
+                return;
+            }
+
+            galleys.forEach(function(galley) {
+                highlightGalley(galley);
+            });
+        }
+
+
+        /*
+         * Recherche d’une zone dans le SVG.
+         *
+         * Cette fonction marche si l’ID est placé sur :
+         *
+         * - un polygon
+         * - un rect
+         * - un path
+         * - un groupe g
+         */
+        function highlightGalley(galley) {
+
+            if (!lopaDoc) {
+                return;
+            }
+
+            const zone =
+                lopaDoc.getElementById(galley);
+
+            console.log(
+                "Searching galley:",
+                galley,
+                zone
+            );
+
+            if (!zone) {
+                console.warn(
+                    "No SVG element found for ID:",
+                    galley
+                );
+                return;
+            }
+
+            let elementsToHighlight = [];
+
+            if (
+                zone.matches &&
+                zone.matches("rect, polygon, path, circle, ellipse")
+            ) {
+                elementsToHighlight.push(zone);
+            }
+
+            if (zone.querySelectorAll) {
+
+                const childShapes =
+                    zone.querySelectorAll(
+                        "rect, polygon, path, circle, ellipse"
+                    );
+
+                elementsToHighlight.push(
+                    ...childShapes
+                );
+            }
+
+            if (elementsToHighlight.length === 0) {
+                elementsToHighlight.push(zone);
+            }
+
+            elementsToHighlight.forEach(function(element) {
+
+                saveOriginalSVGStyle(element);
+
+                element.setAttribute(
+                    "data-galley-highlighted",
+                    "true"
+                );
+
+                element.style.fill = "#d71920";
+                element.style.fillOpacity = "0.60";
+                element.style.stroke = "#d71920";
+                element.style.strokeWidth = "2";
+            });
+
+            console.log(
+                "Highlighted galley:",
+                galley
+            );
+        }
+
+
+        /*
+         * Sauvegarde du style original de chaque zone.
+         *
+         * Cela évite d’effacer le dessin original du SVG
+         * lorsqu’une nouvelle recherche est effectuée.
+         */
+        function saveOriginalSVGStyle(element) {
+
+            if (
+                element.hasAttribute(
+                    "data-original-style"
+                )
+            ) {
+                return;
+            }
+
+            const originalStyle =
+                element.getAttribute("style");
+
+            if (originalStyle === null) {
+                element.setAttribute(
+                    "data-original-style",
+                    "__NO_STYLE__"
+                );
+            }
+            else {
+                element.setAttribute(
+                    "data-original-style",
+                    originalStyle
+                );
+            }
+        }
+
+
+        /*
+         * Suppression des anciennes surbrillances uniquement.
+         *
+         * Contrairement à querySelectorAll("rect") ou
+         * querySelectorAll("polygon"), cette fonction ne rend pas
+         * accidentellement tout le plan transparent.
+         */
+        function clearHighlights() {
+
+            if (!lopaDoc) {
+                return;
+            }
+
+            const highlightedElements =
+                lopaDoc.querySelectorAll(
+                    '[data-galley-highlighted="true"]'
+                );
+
+            highlightedElements.forEach(function(element) {
+
+                const originalStyle =
+                    element.getAttribute(
+                        "data-original-style"
+                    );
+
+                if (
+                    originalStyle === null ||
+                    originalStyle === "__NO_STYLE__"
+                ) {
+                    element.removeAttribute("style");
+                }
+                else {
+                    element.setAttribute(
+                        "style",
+                        originalStyle
+                    );
+                }
+
+                element.removeAttribute(
+                    "data-galley-highlighted"
+                );
+            });
+        }
+
+
+        /*
+         * Normalise les textes pour permettre une recherche :
+         *
+         * - sans tenir compte des majuscules
+         * - sans tenir compte des accents
+         */
+        function normalizeText(value) {
+
+            return String(value)
+                .normalize("NFD")
+                .replace(/[\u0300-\u036f]/g, "")
+                .toUpperCase()
+                .trim();
+        }
+
+
+        /*
+         * Évite qu’une valeur provenant du JSON soit interprétée
+         * comme du code HTML.
+         */
+        function escapeHTML(value) {
+
+            return String(value)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+
+        /*
+         * Affichage sécuritaire des valeurs du JSON.
+         */
+        function formatValue(value) {
+
+            if (
+                value === null ||
+                value === undefined ||
+                String(value).trim() === ""
+            ) {
+                return "Non indiqué";
+            }
+
+            return escapeHTML(value);
+        }
+    </script>
+
+</body>
+
+</html>
