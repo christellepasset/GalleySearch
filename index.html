@@ -325,11 +325,11 @@
          * Chargement du fichier JSON.
          *
          * Le fichier doit s’appeler exactement :
-         * 1955-galleydata.json
+         * galleydata.json
          *
          * Il doit être placé dans le même dossier que index.html.
          */
-        fetch("1955-galleydata.json")
+        fetch("galleydata.json")
             .then(function(response) {
 
                 if (!response.ok) {
@@ -363,7 +363,7 @@
             .catch(function(error) {
 
                 console.error(
-                    "Unable to load 1955-galleydata.json:",
+                    "Unable to load galleydata.json:",
                     error
                 );
 
@@ -374,7 +374,7 @@
                         <strong>Le fichier de données ne peut pas être chargé.</strong>
                         <br><br>
                         Vérifiez que le fichier
-                        <strong>1955-galleydata.json</strong>
+                        <strong>galleydata.json</strong>
                         se trouve dans le même dossier que
                         <strong>index.html</strong>.
                         <br><br>
